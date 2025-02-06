@@ -2,7 +2,7 @@
 pool:
   name: Default  # This should be the name of your agent pool
   demands:
-    - agent.name -equals ec2agent
+    - agent.name -equals ec2agent  # Specify your self-hosted agent name
 
 # Trigger to run on specific branches
 trigger:
@@ -15,11 +15,14 @@ jobs:
     displayName: 'Build and Deploy PHP Application'
 
     steps:
-    - task: UsePhpVersion@0
-      inputs:
-        versionSpec: '7.4'  # Adjust the PHP version as needed
-        addToPath: true  # Ensure PHP is added to the system PATH
-
+    - script: |
+        # Update package lists
+        sudo apt-get update
+        # Install PHP (you can specify any version you need here, e.g., PHP 7.4 or 8.0)
+        sudo apt-get install -y php7.4 php7.4-fpm php7.4-mysql php7.4-xml php7.4-mbstring php7.4-zip
+        sudo apt-get install -y curl unzip git  # Ensure curl and other dependencies are available
+      displayName: 'Install PHP and required dependencies'
+    
     - task: Checkout@1
       displayName: 'Checkout source code'
       inputs:
@@ -32,7 +35,7 @@ jobs:
         curl -sS https://getcomposer.org/installer | php  # Install Composer
         php composer.phar install --no-dev --optimize-autoloader  # Install dependencies
       displayName: 'Install PHP Dependencies with Composer'
-    
+
     - task: CopyFiles@2
       displayName: 'Copy files to target server'
       inputs:
