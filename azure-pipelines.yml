@@ -46,7 +46,7 @@ jobs:
     - task: SSH@0
       displayName: 'Deploy and restart Nginx and PHP-FPM'
       inputs:
-        sshEndpoint: 'your-ssh-service-connection'  # Set up an SSH service connection for your target machine
+        sshEndpoint: 'endpoint'  # Set up an SSH service connection for your target machine
         runOptions: 'commands'
         commands: |
           sudo systemctl restart nginx  # Restart Nginx to apply changes
