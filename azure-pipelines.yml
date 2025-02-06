@@ -1,0 +1,51 @@
+# Define the pipeline to run on your self-hosted Ubuntu agent
+pool:
+  name: Default  # This should be the name of your agent pool
+  demands:
+    - agent.name -equals ec2agent
+
+# Trigger to run on specific branches
+trigger:
+  branches:
+    include:
+      - main  # Or any other branch you want to trigger the pipeline on
+
+jobs:
+  - job: BuildAndDeploy
+    displayName: 'Build and Deploy PHP Application'
+
+    steps:
+    - task: UsePhpVersion@0
+      inputs:
+        versionSpec: '7.4'  # Adjust the PHP version as needed
+        addToPath: true  # Ensure PHP is added to the system PATH
+
+    - task: Checkout@1
+      displayName: 'Checkout source code'
+      inputs:
+        repository: self
+        clean: true  # Ensures the working directory is cleaned before the build
+
+    # Install PHP dependencies using Composer if necessary
+    - script: |
+        cd $(Build.SourcesDirectory)
+        curl -sS https://getcomposer.org/installer | php  # Install Composer
+        php composer.phar install --no-dev --optimize-autoloader  # Install dependencies
+      displayName: 'Install PHP Dependencies with Composer'
+    
+    - task: CopyFiles@2
+      displayName: 'Copy files to target server'
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'  # Location of your PHP files in the repo
+        Contents: '**/*'  # Include all files (adjust if you only need specific files)
+        TargetFolder: '/var/www/html/your-app'  # Target directory on the server (update this as needed)
+
+    - task: SSH@0
+      displayName: 'Deploy and restart Nginx and PHP-FPM'
+      inputs:
+        sshEndpoint: 'your-ssh-service-connection'  # Set up an SSH service connection for your target machine
+        runOptions: 'commands'
+        commands: |
+          sudo systemctl restart nginx  # Restart Nginx to apply changes
+          sudo systemctl restart php7.4-fpm  # Restart PHP-FPM (adjust PHP version if needed)
+          # You may add other commands if needed (e.g., file permissions)
