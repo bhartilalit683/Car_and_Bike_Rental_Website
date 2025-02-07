@@ -1,41 +1,54 @@
 trigger:
-  branches:
-    include:
-      - main  # Change to the branch you want to trigger the deployment on, e.g., 'master'
+- main  # Or the branch you want to trigger the pipeline on
 
 pool:
-  name: 'windows'  # Use the default hosted agent pool or your self-hosted agent pool if needed
+  name: 'windows'  # Or specify your self-hosted agent pool
 
 jobs:
 - job: DeployPHPWebsite
-  displayName: 'Deploy PHP website to Nginx server'
+  displayName: 'Deploy PHP Website to Nginx Server'
+  pool:
+    name: 'windows'  # Or specify your self-hosted agent pool
+    
   steps:
+  - task: SSH@0
+    displayName: 'Create target directory and deploy files'
+    inputs:
+      sshEndpoint: 'ubuntu'  # Name of your SSH service connection
+      runOptions: 'inline'
+      inline: |
+        # Define the target directory
+        TARGET_DIR="/var/www/Car_and_Bike_Rental_Website"
 
+        # Ensure the target directory exists
+        if [ ! -d "$TARGET_DIR" ]; then
+          echo "Directory $TARGET_DIR does not exist. Creating it now."
+          sudo mkdir -p "$TARGET_DIR"
+        else
+          echo "Directory $TARGET_DIR already exists."
+        fi
 
-    # 2. Deploy PHP files to the Nginx server
-    - task: SSH@0
-      displayName: 'Deploy Website Files to Nginx'
-      inputs:
-        sshEndpoint: 'ubuntu'  # Configure this SSH endpoint in Azure DevOps
-        runOptions: 'inline'
-        inline: |
-          
-          cd /var/www/Car_and_Bike_Rental_Website
-          
-          
-          git clone  .https://github.com/bhartilalit683/Car_and_Bike_Rental_Website.git
-          sudo chown -R www-data:www-data /var/Car_and_Bike_Rental_Website
-          sudo chmod -R 755 /var/www/Car_and_Bike_Rental_Website
+        # Clone the Git repository into the target directory
+        echo "Cloning the Git repository..."
+        git clone https://github.com/bhartilalit683/Car_and_Bike_Rental_Website.git "$TARGET_DIR"
 
-    # 3. Restart Nginx to apply new files
-    - task: SSH@0
-      displayName: 'Restart Nginx'
-      inputs:
-        sshEndpoint: 'ubuntu'  # Configure this SSH endpoint in Azure DevOps
-        runOptions: 'inline'
-        inline: |
-          
-          sudo systemctl restart nginx
-          sudo systemctl restart php8.1-fpm
+        # Check if git clone was successful
+        if [ $? -eq 0 ]; then
+          echo "Repository cloned successfully."
+        else
+          echo "Git clone failed. Exiting."
+          exit 1
+        fi
 
-    # Optional: You can add more tasks, like running tests or checking logs.
+        # Set ownership and permissions for the cloned files
+        echo "Setting ownership and permissions..."
+        sudo chown -R www-data:www-data "$TARGET_DIR"
+        sudo chmod -R 755 "$TARGET_DIR"
+
+        # Optionally restart Nginx
+        echo "Restarting Nginx service..."
+        sudo systemctl restart nginx
+
+        # Verify Nginx status (optional, for debugging purposes)
+        sudo systemctl status nginx
+
