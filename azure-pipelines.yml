@@ -20,21 +20,16 @@ jobs:
         # Define the target directory
         TARGET_DIR="/var/www/Car_and_Bike_Rental_Website"
 
-        # Ensure the target directory exists, if not, create it
-        if [ ! -d "$TARGET_DIR" ]; then
-          echo "Directory $TARGET_DIR does not exist. Creating it now."
-          sudo mkdir -p "$TARGET_DIR"
+        # Check if the directory exists and clean it up
+        if [ -d "$TARGET_DIR" ]; then
+          echo "$TARGET_DIR exists. Cleaning up the directory."
+          sudo rm -rf "$TARGET_DIR"
         else
-          echo "Directory $TARGET_DIR already exists."
+          echo "$TARGET_DIR does not exist. Proceeding with creation."
         fi
 
-        # If the directory is not empty, clean it up
-        if [ "$(ls -A $TARGET_DIR)" ]; then
-          echo "$TARGET_DIR is not empty. Cleaning up the directory."
-          sudo rm -rf "$TARGET_DIR/*"
-        else
-          echo "$TARGET_DIR is empty. Proceeding with clone."
-        fi
+        # Create the target directory (if not already cleaned)
+        sudo mkdir -p "$TARGET_DIR"
 
         # Clone the Git repository into the target directory
         echo "Cloning the Git repository..."
