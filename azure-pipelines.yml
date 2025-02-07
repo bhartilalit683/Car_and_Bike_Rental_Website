@@ -30,7 +30,7 @@ jobs:
 
         # Clone the Git repository into the target directory
         echo "Cloning the Git repository..."
-        git clone https://github.com/bhartilalit683/Car_and_Bike_Rental_Website.git "$TARGET_DIR"
+        sudo git clone https://github.com/bhartilalit683/Car_and_Bike_Rental_Website.git "$TARGET_DIR"
 
         # Check if git clone was successful
         if [ $? -eq 0 ]; then
