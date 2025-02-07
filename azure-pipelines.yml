@@ -4,7 +4,7 @@ trigger:
       - main  # Change to the branch you want to trigger the deployment on, e.g., 'master'
 
 pool:
-  name: 'windows'  # Use the default hosted agent pool or your self-hosted agent pool if needed
+  name: 'Default'  # Use the default hosted agent pool or your self-hosted agent pool if needed
 
 jobs:
 - job: DeployPHPWebsite
