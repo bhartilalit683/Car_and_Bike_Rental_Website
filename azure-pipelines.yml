@@ -21,7 +21,7 @@ jobs:
         inline: |
           
           cd /var/www/Car_and_Bike_Rental_Website
-          rm -rf *  # Optional: Remove old files
+          
           
           git clone  .https://github.com/bhartilalit683/Car_and_Bike_Rental_Website.git
           sudo chown -R www-data:www-data /var/Car_and_Bike_Rental_Website
