@@ -20,12 +20,20 @@ jobs:
         # Define the target directory
         TARGET_DIR="/var/www/Car_and_Bike_Rental_Website"
 
-        # Ensure the target directory exists
+        # Ensure the target directory exists, if not, create it
         if [ ! -d "$TARGET_DIR" ]; then
           echo "Directory $TARGET_DIR does not exist. Creating it now."
           sudo mkdir -p "$TARGET_DIR"
         else
           echo "Directory $TARGET_DIR already exists."
+        fi
+
+        # If the directory is not empty, clean it up
+        if [ "$(ls -A $TARGET_DIR)" ]; then
+          echo "$TARGET_DIR is not empty. Cleaning up the directory."
+          sudo rm -rf "$TARGET_DIR/*"
+        else
+          echo "$TARGET_DIR is empty. Proceeding with clone."
         fi
 
         # Clone the Git repository into the target directory
@@ -51,4 +59,3 @@ jobs:
 
         # Verify Nginx status (optional, for debugging purposes)
         sudo systemctl status nginx
-
