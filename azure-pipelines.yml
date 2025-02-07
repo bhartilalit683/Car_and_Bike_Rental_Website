@@ -4,25 +4,13 @@ trigger:
       - main  # Change to the branch you want to trigger the deployment on, e.g., 'master'
 
 pool:
-  name: 'Default'  # Use the default hosted agent pool or your self-hosted agent pool if needed
+  name: 'windows'  # Use the default hosted agent pool or your self-hosted agent pool if needed
 
 jobs:
 - job: DeployPHPWebsite
   displayName: 'Deploy PHP website to Nginx server'
   steps:
 
-    # 1. Install dependencies (e.g., PHP 8.1 and PHP-FPM)
-    - task: AzureCLI@2
-      displayName: 'Install PHP 8.1 and PHP-FPM'
-      inputs:
-        azureSubscription: 'Your Azure Subscription'
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          # Update the package list and install PHP 8.1 and PHP-FPM
-          sudo add-apt-repository ppa:ondrej/php
-          sudo apt-get update
-          sudo apt-get install -y php8.1 php8.1-fpm php8.1-mysql php8.1-xml php8.1-mbstring
 
     # 2. Deploy PHP files to the Nginx server
     - task: SSH@0
@@ -31,11 +19,11 @@ jobs:
         sshEndpoint: 'NginxServerConnection'  # Configure this SSH endpoint in Azure DevOps
         runOptions: 'inline'
         inline: |
-          # Navigate to the correct directory and deploy the files
-          cd /var/www/your_php_site
+          
+          cd /var/www/Car_and_Bike_Rental_Website
           rm -rf *  # Optional: Remove old files
-          # Deploy new files from GitHub repository
-          git clone https://github.com/yourusername/yourrepository.git .
+          
+          git clone  .https://github.com/bhartilalit683/Car_and_Bike_Rental_Website.git
           sudo chown -R www-data:www-data /var/www/your_php_site
           sudo chmod -R 755 /var/www/your_php_site
 
@@ -43,7 +31,7 @@ jobs:
     - task: SSH@0
       displayName: 'Restart Nginx'
       inputs:
-        sshEndpoint: 'NginxServerConnection'  # Configure this SSH endpoint in Azure DevOps
+        sshEndpoint: 'ubuntu'  # Configure this SSH endpoint in Azure DevOps
         runOptions: 'inline'
         inline: |
           # Restart Nginx to apply the new files
