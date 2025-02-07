@@ -16,7 +16,7 @@ jobs:
     - task: SSH@0
       displayName: 'Deploy Website Files to Nginx'
       inputs:
-        sshEndpoint: 'NginxServerConnection'  # Configure this SSH endpoint in Azure DevOps
+        sshEndpoint: 'ubuntu'  # Configure this SSH endpoint in Azure DevOps
         runOptions: 'inline'
         inline: |
           
@@ -24,8 +24,8 @@ jobs:
           rm -rf *  # Optional: Remove old files
           
           git clone  .https://github.com/bhartilalit683/Car_and_Bike_Rental_Website.git
-          sudo chown -R www-data:www-data /var/www/your_php_site
-          sudo chmod -R 755 /var/www/your_php_site
+          sudo chown -R www-data:www-data /var/Car_and_Bike_Rental_Website
+          sudo chmod -R 755 /var/www/Car_and_Bike_Rental_Website
 
     # 3. Restart Nginx to apply new files
     - task: SSH@0
@@ -34,7 +34,7 @@ jobs:
         sshEndpoint: 'ubuntu'  # Configure this SSH endpoint in Azure DevOps
         runOptions: 'inline'
         inline: |
-          # Restart Nginx to apply the new files
+          
           sudo systemctl restart nginx
           sudo systemctl restart php8.1-fpm
 
