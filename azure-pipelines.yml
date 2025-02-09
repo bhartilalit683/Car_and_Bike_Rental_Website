@@ -5,18 +5,18 @@ pool:
   name: 'windows' # Replace with the name of your self-hosted agent pool
 
 variables:
-  DEPLOYMENT_DIR: '/var/www/Car_and_Bike_Rental_Website'
+  DEPLOYMENT_DIR: '/var/www/html/Car_and_Bike_Rental_Website'
   NGINX_SERVER: 'ubuntu@ip-172-31-30-100'
 
 steps:
 
 - script: |
     echo "Syncing files to Nginx server..."
-    rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" . $(ubuntu@ip-172-31-30-100):$(/var/www/Car_and_Bike_Rental_Website)
+    rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" . $(ubuntu@ip-172-31-30-100):$(/var/www/html/Car_and_Bike_Rental_Website)
   displayName: 'Sync Files with rsync'
 
 - script: |
     echo "Setting permissions and restarting Nginx..."
-    ssh -o StrictHostKeyChecking=no $(ubuntu@ip-172-31-30-100) "chmod -R 755 $(/var/www/Car_and_Bike_Rental_Website)"
+    ssh -o StrictHostKeyChecking=no $(ubuntu@ip-172-31-30-100) "chmod -R 755 $(/var/www/html/Car_and_Bike_Rental_Website)"
     ssh -o StrictHostKeyChecking=no $(ubuntu@ip-172-31-30-100) "sudo systemctl restart nginx"
   displayName: 'Set Permissions and Restart Nginx'
