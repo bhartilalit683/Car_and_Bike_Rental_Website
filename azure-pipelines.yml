@@ -1,56 +1,26 @@
 trigger:
-- main  # Or the branch you want to trigger the pipeline on
+- main
 
 pool:
-  name: 'windows'  # Or specify your self-hosted agent pool
+  name: 'windows' # Replace with the name of your self-hosted agent pool
 
-jobs:
-- job: DeployPHPWebsite
-  displayName: 'Deploy PHP Website to Nginx Server'
-  pool:
-    name: 'windows'  # Or specify your self-hosted agent pool
-    
-  steps:
-  - task: SSH@0
-    displayName: 'Create target directory and deploy files'
-    inputs:
-      sshEndpoint: 'ubuntu'  # Name of your SSH service connection
-      runOptions: 'inline'
-      inline: |
-        # Define the target directory
-        TARGET_DIR="/var/www/Car_and_Bike_Rental_Website"
+variables:
+  DEPLOYMENT_DIR: '/var/www/Car_and_Bike_Rental_Website'
+  NGINX_SERVER: 'ubuntu@ip-172-31-30-100'
 
-        # Check if the directory exists and clean it up
-        if [ -d "$TARGET_DIR" ]; then
-          echo "$TARGET_DIR exists. Cleaning up the directory."
-          sudo rm -rf "$TARGET_DIR"
-        else
-          echo "$TARGET_DIR does not exist. Proceeding with creation."
-        fi
+steps:
+- script: |
+    echo "Installing dependencies..."
+    composer install --no-dev --optimize-autoloader
+  displayName: 'Install Composer Dependencies'
 
-        # Create the target directory (if not already cleaned)
-        sudo mkdir -p "$TARGET_DIR"
+- script: |
+    echo "Syncing files to Nginx server..."
+    rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" . $(ubuntu@ip-172-31-30-100):$(/var/www/Car_and_Bike_Rental_Website)
+  displayName: 'Sync Files with rsync'
 
-        # Clone the Git repository into the target directory
-        echo "Cloning the Git repository..."
-        sudo git clone https://github.com/bhartilalit683/Car_and_Bike_Rental_Website.git "$TARGET_DIR"
-
-        # Check if git clone was successful
-        if [ $? -eq 0 ]; then
-          echo "Repository cloned successfully."
-        else
-          echo "Git clone failed. Exiting."
-          exit 1
-        fi
-
-        # Set ownership and permissions for the cloned files
-        echo "Setting ownership and permissions..."
-        sudo chown -R www-data:www-data "$TARGET_DIR"
-        sudo chmod -R 755 "$TARGET_DIR"
-
-        # Optionally restart Nginx
-        echo "Restarting Nginx service..."
-        sudo systemctl restart nginx
-
-        # Verify Nginx status (optional, for debugging purposes)
-        sudo systemctl status nginx
+- script: |
+    echo "Setting permissions and restarting Nginx..."
+    ssh -o StrictHostKeyChecking=no $(ubuntu@ip-172-31-30-100) "chmod -R 755 $(/var/www/Car_and_Bike_Rental_Website)"
+    ssh -o StrictHostKeyChecking=no $(ubuntu@ip-172-31-30-100) "sudo systemctl restart nginx"
+  displayName: 'Set Permissions and Restart Nginx'
