@@ -9,10 +9,6 @@ variables:
   NGINX_SERVER: 'ubuntu@ip-172-31-30-100'
 
 steps:
-- script: |
-    echo "Installing dependencies..."
-    composer install --no-dev --optimize-autoloader
-  displayName: 'Install Composer Dependencies'
 
 - script: |
     echo "Syncing files to Nginx server..."
