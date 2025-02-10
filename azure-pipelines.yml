@@ -6,17 +6,17 @@ pool:
 
 variables:
   DEPLOYMENT_DIR: '/var/www/html/Car_and_Bike_Rental_Website'
-  NGINX_SERVER: 'ubu'
+  NGINX_SERVER: '107.23.163.170'  # Replace with the actual hostname or IP address
 
 steps:
 
 - script: |
     echo "Syncing files to Nginx server..."
-    rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" . $(ubu):$(/var/www/html/Car_and_Bike_Rental_Website)
+    rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" ./ $(NGINX_SERVER):$(DEPLOYMENT_DIR)
   displayName: 'Sync Files with rsync'
 
 - script: |
     echo "Setting permissions and restarting Nginx..."
-    ssh -o StrictHostKeyChecking=no $(ubu) "chmod -R 755 $(/var/www/html/Car_and_Bike_Rental_Website)"
-    ssh -o StrictHostKeyChecking=no $(ubu) "sudo systemctl restart nginx"
+    ssh -o StrictHostKeyChecking=no $(NGINX_SERVER) "chmod -R 755 $(DEPLOYMENT_DIR)"
+    ssh -o StrictHostKeyChecking=no $(NGINX_SERVER) "sudo systemctl restart nginx"
   displayName: 'Set Permissions and Restart Nginx'
